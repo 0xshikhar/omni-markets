@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import Sidebar from "@/components/navigation/sidebar"
-import { WalletConnect } from "@/components/WalletConnect"
+import { AuthButton } from "@/components/AuthButton"
 
 export function ConditionalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -18,7 +18,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <header className="border-b border-gray-400 bg-white p-4 flex justify-end items-center">
-          <WalletConnect />
+          <AuthButton />
         </header>
         
         {/* Main Content */}
