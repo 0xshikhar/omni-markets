@@ -131,7 +131,7 @@ export default function LeaderboardPage() {
           Leaderboards
         </h1>
         <p className="text-muted-foreground">
-          Top performers in the Moments prediction market
+          Top performers in the OmniMarkets
         </p>
       </div>
 
