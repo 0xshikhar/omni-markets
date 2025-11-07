@@ -6,7 +6,7 @@ import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Providers } from "@/app/providers"
-import Navbar from "@/components/navigation/navbar"
+import { ConditionalLayout } from "@/components/ConditionalLayout"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -68,23 +68,18 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
-      <body
-        className={cn(
-          "min-h-screen bg-background antialiased flex flex-col",
-          inter.className
-        )}
-      >
+      <body className={cn("bg-white min-h-screen", inter.className)}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
+          forcedTheme="light"
         >
           <Providers>
-            <Navbar />
-            <main className="flex-1">
+            <ConditionalLayout>
               {children}
-            </main>
+            </ConditionalLayout>
           </Providers>
         </ThemeProvider>
       </body>
