@@ -14,7 +14,7 @@ export default function Home() {
               <span className="text-black text-2xl font-bold">M</span>
             </div>
             <div>
-              <div className="text-xl font-bold text-foreground">Moments</div>
+              <div className="text-xl font-bold text-foreground">OmniMarkets</div>
               <div className="text-xs font-semibold text-[#a4ff31]">Predict & Win</div>
             </div>
           </Link>
@@ -29,18 +29,18 @@ export default function Home() {
           <div className="inline-block">
             <span className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#a4ff31] text-black font-semibold text-sm">
               <Zap className="h-4 w-4 text-[#a4ff31]" />
-              Powered by Flow Blockchain
+              Powered by Binance Smart Chain
             </span>
           </div>
           
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-            <span className="text-gradient-green">Moments</span>
+            <span className="text-gradient-green">OmniMarkets</span>
             <br />
             <span className="text-foreground">Sports Prediction Markets</span>
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Swipe through predictions. Battle with NFTs. Win real rewards on Flow blockchain.
+            Swipe through predictions. Battle with NFTs. Win real rewards on Binance Smart Chain.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
