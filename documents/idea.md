@@ -3,8 +3,8 @@ OmniMarkets will be an aggregated prediction market protocol featuring:
 
 Unified cross-platform order routing (PolyBet-style)
 AI-protected Oracle/Dispute Layer (PredictLayer)
-Private subjective prediction markets (zkKYC, NebulaID + MPC/AA)
-End-to-end privacy and gasless UX on BNB (opBNB) & Oasis Sapphire
+Private subjective prediction markets (zkKYC, NebulaID + MPC/AA -- will be implemented later)
+End-to-end privacy and gasless UX on BNB (opBNB) & Oasis Sapphire 
 1. App Structure
 Monorepo Structure
 

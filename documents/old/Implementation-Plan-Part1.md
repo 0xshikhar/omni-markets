@@ -36,11 +36,9 @@ mkdir -p frontend mobile shared/{types,abis,sdk,utils} docs
 - Port PolyBet.sol → MarketAggregator.sol
 - Write deployment scripts
 
-**Day 5: Database Setup**
-- Create Supabase project
+**Day 5: Database Setup** ( no supabase - will be using prisma + postgrel cloud only)
 - Run SQL schema (markets, marketplaces, external_markets, bet_slips, etc.)
 - Generate TypeScript types
-- Set up RLS policies
 
 ### Week 2: Frontend Foundation
 
@@ -56,7 +54,7 @@ mkdir -p frontend mobile shared/{types,abis,sdk,utils} docs
 - Implement basic routing (/, /[marketId], /portfolio)
 
 **Day 5: Integration**
-- Connect frontend to Supabase
+- Connect frontend to prisma + postgrel cloud
 - Implement market fetching
 - Test wallet connection & contract interaction
 
@@ -176,7 +174,7 @@ contract SubjectiveMarketFactory {
 - Write tests
 - Deploy to testnet
 
-### Week 8: Attestation & Voting
+### Week 8: Attestation & Voting ( not needed in current state)
 
 **Implementation**:
 ```typescript
@@ -199,7 +197,7 @@ export class MPCVoting {
 
 ---
 
-## Phase 5: Privacy & Advanced Features (Weeks 9-10)
+## Phase 5: Privacy & Advanced Features (Weeks 9-10 -  not needed in current state))
 
 ### Week 9: Confidential Contracts
 
