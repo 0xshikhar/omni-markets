@@ -45,13 +45,28 @@ module.exports = {
       url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
       accounts: [PRIVATE_KEY]
     },
-    // Filecoin networks
-    filecoinCalibration: {
-      url: "https://api.calibration.node.glif.io/rpc/v1",
+    // BSC networks
+    bscTestnet: {
+      url: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
+      chainId: 97,
+      accounts: [PRIVATE_KEY],
+      gasPrice: 10000000000 // 10 gwei
+    },
+    bscMainnet: {
+      url: "https://bsc-dataseed.bnbchain.org",
+      chainId: 56,
+      accounts: [PRIVATE_KEY],
+      gasPrice: 5000000000 // 5 gwei
+    },
+    // opBNB networks
+    opBNBTestnet: {
+      url: "https://opbnb-testnet-rpc.bnbchain.org",
+      chainId: 5611,
       accounts: [PRIVATE_KEY]
     },
-    filecoinMainnet: {
-      url: "https://api.node.glif.io",
+    opBNBMainnet: {
+      url: "https://opbnb-mainnet-rpc.bnbchain.org",
+      chainId: 204,
       accounts: [PRIVATE_KEY]
     }
   },
@@ -66,7 +81,9 @@ module.exports = {
       goerli: ETHERSCAN_API_KEY,
       sepolia: ETHERSCAN_API_KEY,
       polygonMumbai: POLYGON_SCAN_API_KEY,
-      polygon: POLYGON_SCAN_API_KEY
+      polygon: POLYGON_SCAN_API_KEY,
+      bscTestnet: process.env.BSCSCAN_API_KEY || "",
+      bsc: process.env.BSCSCAN_API_KEY || ""
     }
   },
   gasReporter: {
