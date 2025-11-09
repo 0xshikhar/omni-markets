@@ -22,7 +22,7 @@ async function main() {
   };
   
   // Create the directory if it doesn't exist
-  const deploymentDir = "../app/src/deployments";
+  const deploymentDir = "../web-app/src/deployments";
   if (!fs.existsSync(deploymentDir)) {
     fs.mkdirSync(deploymentDir, { recursive: true });
   }
