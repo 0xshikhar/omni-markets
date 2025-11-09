@@ -74,7 +74,7 @@ export default function Sidebar() {
                 <span className="text-black text-2xl font-bold">M</span>
               </div>
               <div>
-                <div className="text-xl font-bold text-foreground">Moments</div>
+                <div className="text-xl font-bold text-foreground">OmniMarkets</div>
                 <div className="text-xs font-semibold text-[#a4ff31]">Predict & Win</div>
               </div>
             </Link>
