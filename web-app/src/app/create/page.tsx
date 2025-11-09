@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { AuthButton } from "@/components/AuthButton"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -27,10 +26,6 @@ export default function CreatePage() {
     creatorFee: "5.0",
     mediaFile: null as File | null,
   })
-
-  useEffect(() => {
-    fcl.currentUser.subscribe(setUser)
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
