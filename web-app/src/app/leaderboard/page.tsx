@@ -83,7 +83,7 @@ export default function LeaderboardPage() {
           {type === "earnings" && (
             <>
               <div className="text-2xl font-bold text-green-600">
-                {parseFloat(entry.totalEarnings || "0").toFixed(2)} FLOW
+                {parseFloat(entry.totalEarnings || "0").toFixed(2)} BNB
               </div>
               <div className="text-sm text-muted-foreground">Total Earnings</div>
             </>
@@ -101,7 +101,7 @@ export default function LeaderboardPage() {
           {type === "volume" && (
             <>
               <div className="text-2xl font-bold text-purple-600">
-                {parseFloat(entry.totalVolume || "0").toFixed(2)} FLOW
+                {parseFloat(entry.totalVolume || "0").toFixed(2)} BNB
               </div>
               <div className="text-sm text-muted-foreground">
                 {entry.predictionCount} predictions
@@ -159,7 +159,7 @@ export default function LeaderboardPage() {
                 Top Earners
               </CardTitle>
               <CardDescription>
-                Users who have earned the most FLOW from winning predictions
+                Users who have earned the most BNB from winning predictions
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -213,7 +213,7 @@ export default function LeaderboardPage() {
                 Highest Volume Traders
               </CardTitle>
               <CardDescription>
-                Users who have placed the most FLOW in predictions
+                Users who have placed the most BNB in predictions
               </CardDescription>
             </CardHeader>
             <CardContent>

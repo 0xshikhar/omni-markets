@@ -174,7 +174,7 @@ export default function CreatePage() {
               <div className="space-y-2">
                 <Label htmlFor="minStake" className="text-lg font-bold text-gray-900 flex items-center gap-2">
                   <Coins className="h-5 w-5 text-[#a4ff31]" />
-                  Minimum Stake (FLOW)
+                  Minimum Stake (BNB)
                 </Label>
                 <Input
                   id="minStake"
@@ -211,9 +211,9 @@ export default function CreatePage() {
 
               {/* Estimated Earnings */}
               <div className="bg-[#e8ffe0] border border-[#a4ff31] p-4">
-                <p className="text-sm text-gray-600 mb-1">Estimated earnings (if pool reaches 100 FLOW):</p>
+                <p className="text-sm text-gray-600 mb-1">Estimated earnings (if pool reaches 100 BNB):</p>
                 <p className="text-3xl font-bold text-[#a4ff31]">
-                  {(100 * parseFloat(formData.creatorFee) / 100).toFixed(2)} FLOW
+                  {(100 * parseFloat(formData.creatorFee) / 100).toFixed(2)} BNB
                 </p>
               </div>
 
@@ -265,7 +265,7 @@ export default function CreatePage() {
               <div className="space-y-3">
                 <div className="bg-gray-50 p-3 border border-gray-300">
                   <p className="text-xs text-gray-600">Min Stake</p>
-                  <p className="text-lg font-bold text-[#a4ff31]">{formData.minStake} FLOW</p>
+                  <p className="text-lg font-bold text-[#a4ff31]">{formData.minStake} BNB</p>
                 </div>
                 <div className="bg-gray-50 p-3 border border-gray-300">
                   <p className="text-xs text-gray-600">Creator Fee</p>

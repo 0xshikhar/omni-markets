@@ -117,7 +117,7 @@ export default function FeedPage() {
 
             <div className="dual-block-card p-6">
               <p className="text-xs text-gray-600 font-semibold mb-1">Total Volume</p>
-              <p className="text-2xl font-black text-[#a4ff31]">{totalVolume.toFixed(1)} FLOW</p>
+              <p className="text-2xl font-black text-[#a4ff31]">{totalVolume.toFixed(1)} BNB</p>
             </div>
 
             <div className="dual-block-card p-6">

@@ -11,7 +11,9 @@ import 'dotenv/config';
 
 import {
     mainnet,
-    sepolia
+    sepolia,
+    bsc,
+    bscTestnet
 } from 'wagmi/chains';
 import { agentChain } from '@/lib/customChain';
 import { createConfig } from 'wagmi';
@@ -19,10 +21,12 @@ import { http } from 'viem';
 
 // Configure wagmi client
 const config = createConfig({
-    chains: [mainnet, sepolia, agentChain],
+    chains: [mainnet, sepolia, bsc, bscTestnet, agentChain],
     transports: {
         [mainnet.id]: http(),
         [sepolia.id]: http(),
+        [bsc.id]: http(),
+        [bscTestnet.id]: http(),
         [agentChain.id]: http(),
     },
 });

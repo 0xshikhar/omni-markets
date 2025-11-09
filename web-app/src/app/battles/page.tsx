@@ -117,7 +117,7 @@ export default function BattlesPage() {
                   {creatorOdds}%
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {parseFloat(battle.creatorPool).toFixed(2)} FLOW
+                  {parseFloat(battle.creatorPool).toFixed(2)} BNB
                 </div>
               </div>
 
@@ -143,7 +143,7 @@ export default function BattlesPage() {
                   {opponentOdds}%
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {parseFloat(battle.opponentPool).toFixed(2)} FLOW
+                  {parseFloat(battle.opponentPool).toFixed(2)} BNB
                 </div>
               </div>
             </div>
@@ -152,7 +152,7 @@ export default function BattlesPage() {
             <div className="text-center p-3 bg-accent rounded-lg">
               <div className="text-sm text-muted-foreground">Total Pool</div>
               <div className="text-2xl font-bold text-primary">
-                {totalPool.toFixed(2)} FLOW
+                {totalPool.toFixed(2)} BNB
               </div>
             </div>
 

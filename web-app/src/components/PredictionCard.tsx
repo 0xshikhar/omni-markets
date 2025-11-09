@@ -74,7 +74,7 @@ export function PredictionCard({
           <div className="absolute top-4 right-4">
             <Badge className="bg-[#a4ff31] text-black border border-[#a4ff31] font-bold shadow-lg neon-glow">
               <Coins className="mr-1 h-4 w-4" />
-              {totalVolume.toFixed(0)} FLOW
+              {totalVolume.toFixed(0)} BNB
             </Badge>
           </div>
         </div>
@@ -163,7 +163,7 @@ export function PredictionCard({
                 className="flex-1 px-3 py-2 bg-white border border-gray-300 font-bold text-lg focus:border-[#a4ff31] focus:ring-2 focus:ring-[#a4ff31]/20 outline-none transition-all"
                 placeholder="Amount"
               />
-              <span className="font-black text-[#a4ff31] text-lg">FLOW</span>
+              <span className="font-black text-[#a4ff31] text-lg">BNB</span>
             </div>
 
             <Button
@@ -176,7 +176,7 @@ export function PredictionCard({
               ) : (
                 <>
                   <TrendingUp className="mr-2 h-5 w-5 md:h-6 md:w-6" />
-                  Bet {amount} FLOW on {selectedOutcome.toUpperCase()}
+                  Bet {amount} BNB on {selectedOutcome.toUpperCase()}
                 </>
               )}
             </Button>
@@ -185,9 +185,10 @@ export function PredictionCard({
 
         {/* Min Stake Info */}
         <p className="text-xs md:text-sm text-center text-gray-600">
-          Minimum stake: <span className="font-bold text-[#a4ff31]">{minStake} FLOW</span>
+          Minimum stake: <span className="font-bold text-[#a4ff31]">{minStake} BNB</span>
         </p>
       </div>
     </Card>
   )
 }
+
