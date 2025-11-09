@@ -1,0 +1,17 @@
+{
+  "name": "@omni-markets/ai-oracle",
+  "version": "1.0.0",
+  "description": "AI-powered oracle for market resolution monitoring",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0",
+    "ethers": "^6.9.0",
+    "node-fetch": "^3.3.2",
+    "dotenv": "^16.3.1"
+  },
+  "type": "module"
+}
