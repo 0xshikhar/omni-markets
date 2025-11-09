@@ -15,7 +15,7 @@
 
 ## Project Setup
 
-### 1. Initialize Monorepo
+### 1. Initialize repo ( wont use monorepo for easy deployments)
 
 ```bash
 # Create project structure
@@ -23,9 +23,6 @@ mkdir omni-markets && cd omni-markets
 
 # Initialize with Bun
 bun init
-
-# Install Turborepo for monorepo management
-bun add -D turbo
 
 # Create workspace structure
 mkdir -p contracts services/{market-syncer,ai-oracle,dispute-bot,subjective-oracle}
@@ -81,7 +78,7 @@ mkdir -p frontend shared/{types,utils,sdk} docs scripts
 
 ---
 
-## Smart Contracts Setup
+## Smart Contracts Setup (setup already done)
 
 ### 1. Initialize Hardhat
 
@@ -206,7 +203,7 @@ main()
 
 ## Database Setup
 
-### 1. Initialize Prisma
+### 1. Initialize Prisma ( done)
 
 ```bash
 cd shared
@@ -444,7 +441,7 @@ export default app;
 
 ## Frontend Setup
 
-### 1. Initialize Next.js
+### 1. Initialize Next.js ( done)
 
 ```bash
 cd frontend
