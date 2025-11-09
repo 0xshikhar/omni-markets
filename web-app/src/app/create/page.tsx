@@ -9,15 +9,17 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowLeft, Upload, Calendar, Coins, Percent, Sparkles } from "lucide-react"
 import Link from "next/link"
-import { createMarket } from "@/lib/flow/transactions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { fcl } from "@/lib/flow/config"
+import { useAccount, useWriteContract } from "wagmi"
+import { parseEther } from "viem"
+import { predictionMarketAddress, predictionMarketABI, predictionFns } from "@/lib/prediction"
 
 export default function CreatePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<any>({ loggedIn: false })
+  const { isConnected } = useAccount()
+  const { writeContract } = useWriteContract()
   const [formData, setFormData] = useState({
     question: "",
     closeTime: "",
@@ -38,36 +40,29 @@ export default function CreatePage() {
       return
     }
 
+    if (!isConnected) {
+      toast.error("Please connect your wallet")
+      return
+    }
+
     setLoading(true)
     try {
       const closeTimeUnix = new Date(formData.closeTime).getTime() / 1000
 
-      const result = await createMarket({
-        question: formData.question,
-        closeTime: closeTimeUnix,
-        minStake: formData.minStake,
-        creatorFeePercent: formData.creatorFee,
+      const minStakeWei = parseEther(formData.minStake)
+      const creatorFeeBps = Math.round(parseFloat(formData.creatorFee) * 100)
+
+      await writeContract({
+        address: predictionMarketAddress,
+        abi: predictionMarketABI,
+        functionName: predictionFns.createMarket,
+        args: [
+          formData.question,
+          BigInt(Math.floor(closeTimeUnix)),
+          minStakeWei,
+          creatorFeeBps,
+        ],
       })
-
-      // Extract market ID from events
-      const marketCreatedEvent = result.events?.find((e: any) => e.type.includes("MarketCreated"))
-      const marketId = marketCreatedEvent?.data?.marketId
-
-      if (marketId && user?.addr) {
-        // Sync with database
-        await fetch("/api/markets", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            marketId: parseInt(marketId),
-            creatorAddress: user.addr,
-            question: formData.question,
-            closeTime: closeTimeUnix,
-            minStake: formData.minStake,
-            creatorFeePercent: formData.creatorFee,
-          }),
-        })
-      }
 
       toast.success("Market created successfully! 🎉")
       router.push("/feed")

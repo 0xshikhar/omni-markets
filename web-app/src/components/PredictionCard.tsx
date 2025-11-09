@@ -5,8 +5,10 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ThumbsUp, ThumbsDown, Clock, Coins, TrendingUp, Users } from "lucide-react"
-import { placePredictionViaAction } from "@/lib/flow/transactions"
 import { toast } from "sonner"
+import { useAccount, useWriteContract } from "wagmi"
+import { parseEther } from "viem"
+import { predictionMarketAddress, predictionMarketABI, predictionFns } from "@/lib/prediction"
 
 interface PredictionCardProps {
   marketId: number
@@ -32,6 +34,8 @@ export function PredictionCard({
   const [selectedOutcome, setSelectedOutcome] = useState<"yes" | "no" | null>(null)
   const [amount, setAmount] = useState(minStake)
   const [loading, setLoading] = useState(false)
+  const { isConnected } = useAccount()
+  const { writeContract } = useWriteContract()
 
   const totalVolume = parseFloat(totalYesVolume) + parseFloat(totalNoVolume)
   const yesPercent = totalVolume > 0 ? (parseFloat(totalYesVolume) / totalVolume) * 100 : 50
@@ -47,12 +51,25 @@ export function PredictionCard({
       return
     }
 
+    if (!isConnected) {
+      toast.error("Please connect your wallet")
+      return
+    }
+
     setLoading(true)
     try {
-      await placePredictionViaAction({
-        marketId,
-        outcome: selectedOutcome,
-        amount,
+      const amountWei = parseEther(amount)
+
+      await writeContract({
+        address: predictionMarketAddress,
+        abi: predictionMarketABI,
+        functionName: predictionFns.placePrediction,
+        args: [
+          BigInt(marketId),
+          selectedOutcome === "yes",
+          amountWei,
+        ],
+        value: amountWei,
       })
       toast.success("Prediction placed! 🎉")
       setSelectedOutcome(null)
