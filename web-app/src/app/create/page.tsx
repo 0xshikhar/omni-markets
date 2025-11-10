@@ -6,31 +6,28 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Upload, Calendar, Coins, Percent, Sparkles } from "lucide-react"
+import { ArrowLeft, Lock, Calendar, Coins, Info, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-import { useAccount, useWriteContract } from "wagmi"
-import { parseEther } from "viem"
-import { predictionMarketAddress, predictionMarketABI, predictionFns } from "@/lib/prediction"
+import { useAccount } from "wagmi"
+import { useCreateMarket } from "@/hooks/useMarketAggregator"
 
 export default function CreatePage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
   const { isConnected } = useAccount()
-  const { writeContract } = useWriteContract()
+  const { createMarket, isPending } = useCreateMarket()
   const [formData, setFormData] = useState({
     question: "",
-    closeTime: "",
-    minStake: "1.0",
-    creatorFee: "5.0",
-    mediaFile: null as File | null,
+    category: "general",
+    marketType: "public",
+    resolutionTime: "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.question || !formData.closeTime) {
+    if (!formData.question || !formData.resolutionTime) {
       toast.error("Please fill in all required fields")
       return
     }
@@ -40,54 +37,34 @@ export default function CreatePage() {
       return
     }
 
-    setLoading(true)
     try {
-      const closeTimeUnix = new Date(formData.closeTime).getTime() / 1000
+      const resolutionTimeUnix = Math.floor(new Date(formData.resolutionTime).getTime() / 1000)
 
-      const minStakeWei = parseEther(formData.minStake)
-      const creatorFeeBps = Math.round(parseFloat(formData.creatorFee) * 100)
-
-      await writeContract({
-        address: predictionMarketAddress,
-        abi: predictionMarketABI,
-        functionName: predictionFns.createMarket,
-        args: [
-          formData.question,
-          BigInt(Math.floor(closeTimeUnix)),
-          minStakeWei,
-          creatorFeeBps,
-        ],
-      })
+      await createMarket(
+        formData.question,
+        formData.category,
+        resolutionTimeUnix
+      )
 
       toast.success("Market created successfully! 🎉")
       router.push("/feed")
     } catch (error: any) {
       toast.error(error.message || "Failed to create market")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData({ ...formData, mediaFile: e.target.files[0] })
     }
   }
 
   return (
-    <div className="min-h-screen p-6 md:p-10">
-      <main className="max-w-6xl mx-auto">
-        <div className="mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/feed">
-              <Button variant="outline" size="icon" className="border border-gray-400 hover:border-[#00EF8C] hover:bg-[#E6FFF8]">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-4xl font-black text-gray-900">Create Market</h1>
-              <p className="text-gray-600 font-medium">Launch your prediction and earn fees</p>
-            </div>
+    <div className="min-h-screen p-6 md:p-10 bg-gradient-to-b from-[#FFFEE8] to-[#F6FCE5]">
+      <main className="max-w-4xl mx-auto">
+        <div className="mb-8 flex items-center gap-4">
+          <Link href="/feed">
+            <Button variant="outline" size="icon" className="border border-gray-400 hover:border-[#a4ff31] hover:bg-[#e8ffe0]">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-4xl font-black text-gray-900">Create Market</h1>
+            <p className="text-gray-600 font-medium">Launch a new prediction market on BSC</p>
           </div>
         </div>
 
@@ -95,172 +72,151 @@ export default function CreatePage() {
           <div className="lg:col-span-2">
             <Card className="dual-block-card p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Question */}
                 <div className="space-y-2">
                   <Label htmlFor="question" className="text-lg font-bold text-gray-900 flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-[#a4ff31]" />
-                    Prediction Question
+                    Market Question
                   </Label>
                   <Textarea
                     id="question"
                     value={formData.question}
-                  onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                  placeholder="e.g., Will LeBron score 40+ points tonight vs Celtics?"
-                  className="min-h-24 text-lg border border-gray-300 focus:border-[#a4ff31] focus:ring-2 focus:ring-[#a4ff31]/20"
-                  required
-                />
-                <p className="text-sm text-gray-500">Make it clear and specific!</p>
-              </div>
-
-              {/* Media Upload */}
-              <div className="space-y-2">
-                <Label htmlFor="media" className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <Upload className="h-5 w-5 text-[#a4ff31]" />
-                  Upload Image/Video (Optional)
-                </Label>
-                <div className="border-2 border-dashed border-[#a4ff31] p-8 text-center hover:border-[#b8ff52] transition-colors cursor-pointer bg-[#e8ffe0]">
-                  <input
-                    id="media"
-                    type="file"
-                    accept="image/*,video/*"
-                    onChange={handleFileChange}
-                    className="hidden"
+                    onChange={(e) => setFormData({ ...formData, question: e.target.value })}
+                    placeholder="e.g., Will Bitcoin reach $100k by end of 2025?"
+                    className="min-h-24 text-lg border border-gray-300 focus:border-[#a4ff31] focus:ring-2 focus:ring-[#a4ff31]/20"
+                    required
                   />
-                  <label htmlFor="media" className="cursor-pointer">
-                    {formData.mediaFile ? (
-                      <div className="space-y-2">
-                        <Upload className="h-12 w-12 mx-auto text-[#a4ff31]" />
-                        <p className="font-semibold text-[#a4ff31]">{formData.mediaFile.name}</p>
-                        <p className="text-sm text-gray-500">Click to change</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <Upload className="h-12 w-12 mx-auto text-gray-400" />
-                        <p className="font-semibold text-gray-600">Click to upload</p>
-                        <p className="text-sm text-gray-500">Max 10 seconds for video</p>
-                      </div>
-                    )}
-                  </label>
+                  <p className="text-sm text-gray-500">Be clear and specific. Binary YES/NO outcomes work best.</p>
                 </div>
-              </div>
 
-              {/* Close Time */}
-              <div className="space-y-2">
-                <Label htmlFor="closeTime" className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-[#a4ff31]" />
-                  Close Time
-                </Label>
-                <Input
-                  id="closeTime"
-                  type="datetime-local"
-                  value={formData.closeTime}
-                  onChange={(e) => setFormData({ ...formData, closeTime: e.target.value })}
-                  className="text-lg border border-gray-300 focus:border-[#a4ff31] focus:ring-2 focus:ring-[#a4ff31]/20"
-                  required
-                />
-                <p className="text-sm text-gray-500">When should predictions close?</p>
-              </div>
+                {/* Category */}
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-lg font-bold text-gray-900">Category</Label>
+                  <select
+                    id="category"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full px-4 py-2 text-lg border border-gray-300 rounded focus:border-[#a4ff31] focus:ring-2 focus:ring-[#a4ff31]/20"
+                  >
+                    <option value="general">General</option>
+                    <option value="crypto">Crypto</option>
+                    <option value="politics">Politics</option>
+                    <option value="sports">Sports</option>
+                    <option value="tech">Technology</option>
+                    <option value="finance">Finance</option>
+                  </select>
+                </div>
 
-              {/* Min Stake */}
-              <div className="space-y-2">
-                <Label htmlFor="minStake" className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <Coins className="h-5 w-5 text-[#a4ff31]" />
-                  Minimum Stake (BNB)
-                </Label>
-                <Input
-                  id="minStake"
-                  type="number"
-                  step="0.1"
-                  min="0.1"
-                  value={formData.minStake}
-                  onChange={(e) => setFormData({ ...formData, minStake: e.target.value })}
-                  className="text-lg border border-gray-300 focus:border-[#a4ff31] focus:ring-2 focus:ring-[#a4ff31]/20"
-                  required
-                />
-                <p className="text-sm text-gray-500">Minimum amount users can bet</p>
-              </div>
+                {/* Market Type */}
+                <div className="space-y-2">
+                  <Label htmlFor="marketType" className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Lock className="h-5 w-5 text-[#a4ff31]" />
+                    Market Type
+                  </Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, marketType: "public" })}
+                      className={`p-4 border-2 rounded font-bold transition-all ${
+                        formData.marketType === "public"
+                          ? "border-[#a4ff31] bg-[#e8ffe0]"
+                          : "border-gray-300 hover:border-[#a4ff31]"
+                      }`}
+                    >
+                      Public
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, marketType: "subjective" })}
+                      className={`p-4 border-2 rounded font-bold transition-all ${
+                        formData.marketType === "subjective"
+                          ? "border-[#a4ff31] bg-[#e8ffe0]"
+                          : "border-gray-300 hover:border-[#a4ff31]"
+                      }`}
+                    >
+                      Subjective
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {formData.marketType === "public"
+                      ? "Public markets use external data sources for resolution."
+                      : "Subjective markets use verifier circles for resolution."}
+                  </p>
+                </div>
 
-              {/* Creator Fee */}
-              <div className="space-y-2">
-                <Label htmlFor="creatorFee" className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <Percent className="h-5 w-5 text-[#a4ff31]" />
-                  Creator Fee (%)
-                </Label>
-                <Input
-                  id="creatorFee"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="20"
-                  value={formData.creatorFee}
-                  onChange={(e) => setFormData({ ...formData, creatorFee: e.target.value })}
-                  className="text-lg border border-gray-300 focus:border-[#a4ff31] focus:ring-2 focus:ring-[#a4ff31]/20"
-                  required
-                />
-                <p className="text-sm text-gray-500">Your earnings from total pool (max 20%)</p>
-              </div>
+                {/* Resolution Time */}
+                <div className="space-y-2">
+                  <Label htmlFor="resolutionTime" className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-[#a4ff31]" />
+                    Resolution Time
+                  </Label>
+                  <Input
+                    id="resolutionTime"
+                    type="datetime-local"
+                    value={formData.resolutionTime}
+                    onChange={(e) => setFormData({ ...formData, resolutionTime: e.target.value })}
+                    className="text-lg border border-gray-300 focus:border-[#a4ff31] focus:ring-2 focus:ring-[#a4ff31]/20"
+                    required
+                  />
+                  <p className="text-sm text-gray-500">When should this market close for new bets?</p>
+                </div>
 
-              {/* Estimated Earnings */}
-              <div className="bg-[#e8ffe0] border border-[#a4ff31] p-4">
-                <p className="text-sm text-gray-600 mb-1">Estimated earnings (if pool reaches 100 BNB):</p>
-                <p className="text-3xl font-bold text-[#a4ff31]">
-                  {(100 * parseFloat(formData.creatorFee) / 100).toFixed(2)} BNB
-                </p>
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full h-16 text-xl font-black bg-[#a4ff31] hover:bg-[#b8ff52] text-black shadow-lg hover:shadow-xl neon-glow transition-all duration-200"
-              >
-                {loading ? (
-                  "Creating Market..."
-                ) : (
-                  <>
-                    <Sparkles className="mr-2 h-6 w-6" />
-                    Create Prediction Market
-                  </>
-                )}
-              </Button>
-            </form>
-          </Card>
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={isPending || !isConnected}
+                  className="w-full h-14 text-lg font-black bg-[#a4ff31] hover:bg-[#b8ff52] text-black shadow-lg hover:shadow-xl neon-glow transition-all duration-200"
+                >
+                  {!isConnected ? (
+                    "Connect Wallet First"
+                  ) : isPending ? (
+                    "Creating Market..."
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-5 w-5" />
+                      Create Market
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Card>
           </div>
 
-          {/* Tips Sidebar */}
+          {/* Info Sidebar */}
           <div className="lg:col-span-1 space-y-4">
             <div className="dual-block-card p-6">
-              <h3 className="font-bold text-xl text-gray-900 mb-4">💡 Tips</h3>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-start gap-2">
-                <span className="text-[#a4ff31] font-bold">✓</span>
-                <span>Make questions clear and verifiable (sports stats work best!)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#a4ff31] font-bold">✓</span>
-                <span>Set close time before the event happens</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#a4ff31] font-bold">✓</span>
-                <span>Lower min stake = more participants</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-[#a4ff31] font-bold">✓</span>
-                <span>Add engaging media to attract more bets</span>
-              </li>
-            </ul>
+              <h3 className="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                <Info className="h-5 w-5 text-[#a4ff31]" />
+                Guidelines
+              </h3>
+              <ul className="space-y-3 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#a4ff31] font-bold">✓</span>
+                  <span>Clear, verifiable questions work best</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#a4ff31] font-bold">✓</span>
+                  <span>Set resolution time before the event</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#a4ff31] font-bold">✓</span>
+                  <span>Use categories to help discovery</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#a4ff31] font-bold">✓</span>
+                  <span>Subjective markets need verifiers</span>
+                </li>
+              </ul>
             </div>
 
             <div className="dual-block-card p-6">
-              <h3 className="font-bold text-xl text-gray-900 mb-4">📊 Preview</h3>
-              <div className="space-y-3">
-                <div className="bg-gray-50 p-3 border border-gray-300">
-                  <p className="text-xs text-gray-600">Min Stake</p>
-                  <p className="text-lg font-bold text-[#a4ff31]">{formData.minStake} BNB</p>
-                </div>
-                <div className="bg-gray-50 p-3 border border-gray-300">
-                  <p className="text-xs text-gray-600">Creator Fee</p>
-                  <p className="text-lg font-bold text-[#a4ff31]">{formData.creatorFee}%</p>
-                </div>
+              <h3 className="font-bold text-lg text-gray-900 mb-4">🔄 Liquidity</h3>
+              <p className="text-sm text-gray-700 mb-3">
+                Your market will be aggregated with Polymarket and other sources for maximum liquidity.
+              </p>
+              <div className="bg-[#e8ffe0] border border-[#a4ff31] p-3 rounded">
+                <p className="text-xs text-gray-600">Aggregated Liquidity</p>
+                <p className="text-2xl font-bold text-[#a4ff31]">Coming Soon</p>
               </div>
             </div>
           </div>
