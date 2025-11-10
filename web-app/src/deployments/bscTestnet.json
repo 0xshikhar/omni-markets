@@ -1,0 +1,17 @@
+{
+  "network": "bscTestnet",
+  "chainId": 97,
+  "deployer": "0xb4beF264785fd51D80347f578E0245fCcdF3C055",
+  "contracts": {
+    "MarketAggregator": "0xC284Be07898768F0818aAeC84A0bD95Bc5275670",
+    "AIOracleDispute": "0x52EbCBf8c967Fcb4b83644626822881ADaA9bffF",
+    "SubjectiveMarketFactory": "0x6E83054913aA6C616257Dae2e87BC44F9260EDc6"
+  },
+  "roles": {
+    "ORACLE_ROLE": "0x68e79a7bf1e0bc45d0a330c573bc367f9cf464fd326078812f301165fbda4ef1",
+    "ROUTER_ROLE": "0x7a05a596cb0ce7fdea8a1e1ec73be300bdb35097c944ce1897202f7a13122eb2",
+    "AI_ORACLE_ROLE": "0x482648e7878e9fa54c0a2f67ffd22d00ebc37cf7a03e060e428d2ab0cd6735cc"
+  },
+  "timestamp": "2025-11-11T20:25:24.365Z",
+  "blockNumber": 72191840
+}

@@ -6,8 +6,7 @@ require("dotenv").config();
 
 // Load environment variables
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000000";
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
-const POLYGON_SCAN_API_KEY = process.env.POLYGON_SCAN_API_KEY || "";
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "4UZN3CPR715FWY2352GDYY558JGWUNVRQU";
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY || "";
 
 module.exports = {
@@ -77,14 +76,7 @@ module.exports = {
     artifacts: "./artifacts"
   },
   etherscan: {
-    apiKey: {
-      goerli: ETHERSCAN_API_KEY,
-      sepolia: ETHERSCAN_API_KEY,
-      polygonMumbai: POLYGON_SCAN_API_KEY,
-      polygon: POLYGON_SCAN_API_KEY,
-      bscTestnet: process.env.BSCSCAN_API_KEY || "",
-      bsc: process.env.BSCSCAN_API_KEY || ""
-    }
+    apiKey: ETHERSCAN_API_KEY
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
