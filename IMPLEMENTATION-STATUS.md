@@ -172,7 +172,7 @@ Update pages in `web-app/src/app/`:
 
 ### 5. Testing
 
-#### Contract Tests (TODO)
+#### Contract Tests (TODO - dont need it rn)
 ```bash
 cd contracts
 npx hardhat test
