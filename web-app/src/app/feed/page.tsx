@@ -3,51 +3,50 @@
 import { useState, useEffect, useRef } from "react"
 import { PredictionCard } from "@/components/PredictionCard"
 import { Button } from "@/components/ui/button"
-import { Trophy, Plus, User } from "lucide-react"
+import { Trophy, Plus, User, Loader2 } from "lucide-react"
 import Link from "next/link"
 
-// Mock data - replace with actual API calls
-const mockMarkets = [
-  {
-    marketId: 1,
-    question: "Will LeBron score 40+ points tonight vs Celtics?",
-    closeTime: Date.now() / 1000 + 14400, // 4 hours from now
-    minStake: "1.0",
-    totalYesVolume: "125.5",
-    totalNoVolume: "89.3",
-    creator: "0x1234567890abcdef",
-    mediaUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800",
-  },
-  {
-    marketId: 2,
-    question: "Will Steph Curry hit 8+ three-pointers this game?",
-    closeTime: Date.now() / 1000 + 7200,
-    minStake: "0.5",
-    totalYesVolume: "67.2",
-    totalNoVolume: "103.8",
-    creator: "0xabcdef1234567890",
-    mediaUrl: "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?w=800",
-  },
-  {
-    marketId: 3,
-    question: "Will the Lakers win by 10+ points?",
-    closeTime: Date.now() / 1000 + 10800,
-    minStake: "2.0",
-    totalYesVolume: "234.7",
-    totalNoVolume: "198.4",
-    creator: "0x9876543210fedcba",
-    mediaUrl: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=800",
-  },
-]
+interface Market {
+  id: string;
+  marketId: number;
+  question: string;
+  category: string;
+  status: string;
+  resolutionTime: string;
+  totalVolume: number;
+  creator: string;
+  externalMarkets: Array<{
+    price: number;
+    liquidity: number;
+  }>;
+}
 
 export default function FeedPage() {
+  const [markets, setMarkets] = useState<Market[]>([])
+  const [loading, setLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const totalVolume = mockMarkets.reduce(
-    (sum, m) => sum + parseFloat(m.totalYesVolume) + parseFloat(m.totalNoVolume),
+  // Fetch markets on mount
+  useEffect(() => {
+    async function loadMarkets() {
+      try {
+        const response = await fetch('/api/markets?status=active&limit=20')
+        const data = await response.json()
+        setMarkets(data)
+      } catch (error) {
+        console.error('Failed to load markets:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadMarkets()
+  }, [])
+
+  const totalVolume = markets.reduce(
+    (sum, m) => sum + Number(m.totalVolume),
     0
   )
 
@@ -66,7 +65,7 @@ export default function FeedPage() {
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
 
-    if (isLeftSwipe && currentIndex < mockMarkets.length - 1) {
+    if (isLeftSwipe && currentIndex < markets.length - 1) {
       setCurrentIndex(currentIndex + 1)
     }
     if (isRightSwipe && currentIndex > 0) {
@@ -78,7 +77,7 @@ export default function FeedPage() {
   }
 
   const handleNext = () => {
-    if (currentIndex < mockMarkets.length - 1) {
+    if (currentIndex < markets.length - 1) {
       setCurrentIndex(currentIndex + 1)
     }
   }
@@ -89,7 +88,33 @@ export default function FeedPage() {
     }
   }
 
-  const currentMarket = mockMarkets[currentIndex]
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#FFFEE8] to-[#F6FCE5] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#a4ff31]" />
+      </div>
+    )
+  }
+
+  if (markets.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-[#FFFEE8] to-[#F6FCE5] flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl font-bold mb-4">No active markets found</p>
+          <Link href="/create">
+            <Button className="bg-[#a4ff31] hover:bg-[#b8ff52] text-black font-bold">
+              Create First Market
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  const currentMarket = markets[currentIndex]
+  const yesPrice = currentMarket.externalMarkets[0]?.price || 5000
+  const totalYesVolume = (Number(currentMarket.totalVolume) * yesPrice / 10000).toFixed(2)
+  const totalNoVolume = (Number(currentMarket.totalVolume) * (10000 - yesPrice) / 10000).toFixed(2)
 
   return (
     <div className="bg-gradient-to-b from-[#FFFEE8] to-[#F6FCE5]">
@@ -97,7 +122,7 @@ export default function FeedPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header - Mobile optimized */}
         <div className="p-4 md:p-6">
-          <p className="text-sm text-gray-600 font-medium mb-1">Swipe through markets and place your bets</p>
+          <p className="text-sm text-gray-600 font-medium mb-1">Explore aggregated markets from Polymarket and other sources</p>
         </div>
 
         <div className="grid lg:grid-cols-[300px_1fr] gap-6 px-4 md:px-6">
@@ -110,7 +135,7 @@ export default function FeedPage() {
                 </div>
                 <div>
                   <p className="text-xs text-gray-600 font-semibold">Active Markets</p>
-                  <p className="text-2xl font-black text-gray-900">{mockMarkets.length}</p>
+                  <p className="text-2xl font-black text-gray-900">{markets.length}</p>
                 </div>
               </div>
             </div>
@@ -122,7 +147,7 @@ export default function FeedPage() {
 
             <div className="dual-block-card p-6">
               <p className="text-xs text-gray-600 font-semibold mb-1">Your Position</p>
-              <p className="text-xl font-bold text-gray-900">{currentIndex + 1} / {mockMarkets.length}</p>
+              <p className="text-xl font-bold text-gray-900">{currentIndex + 1} / {markets.length}</p>
             </div>
 
             {/* Quick Actions */}
@@ -154,7 +179,15 @@ export default function FeedPage() {
               onTouchEnd={handleTouchEnd}
               className="relative"
             >
-              <PredictionCard {...currentMarket} />
+              <PredictionCard
+                marketId={currentMarket.marketId}
+                question={currentMarket.question}
+                closeTime={new Date(currentMarket.resolutionTime).getTime() / 1000}
+                minStake="0.01"
+                totalYesVolume={totalYesVolume}
+                totalNoVolume={totalNoVolume}
+                creator={currentMarket.creator}
+              />
             </div>
 
             {/* Navigation - Desktop & Mobile */}
@@ -170,7 +203,7 @@ export default function FeedPage() {
 
               {/* Progress Dots */}
               <div className="flex gap-2">
-                {mockMarkets.map((_, idx) => (
+                {markets.map((_, idx: number) => (
                   <div
                     key={idx}
                     className={`h-2 transition-all duration-300 cursor-pointer ${
@@ -185,7 +218,7 @@ export default function FeedPage() {
 
               <Button
                 onClick={handleNext}
-                disabled={currentIndex === mockMarkets.length - 1}
+                disabled={currentIndex === markets.length - 1}
                 className="bg-[#a4ff31] hover:bg-[#b8ff52] text-black disabled:opacity-30 font-bold neon-glow"
               >
                 Next
