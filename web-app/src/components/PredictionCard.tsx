@@ -6,9 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ThumbsUp, ThumbsDown, Clock, Coins, TrendingUp, Users } from "lucide-react"
 import { toast } from "sonner"
-import { useAccount, useWriteContract } from "wagmi"
-import { parseEther } from "viem"
-import { predictionMarketAddress, predictionMarketABI, predictionFns } from "@/lib/prediction"
+import { useAccount } from "wagmi"
+import { useCreateBetSlip } from "@/hooks/useMarketAggregator"
 
 interface PredictionCardProps {
   marketId: number
@@ -33,9 +32,8 @@ export function PredictionCard({
 }: PredictionCardProps) {
   const [selectedOutcome, setSelectedOutcome] = useState<"yes" | "no" | null>(null)
   const [amount, setAmount] = useState(minStake)
-  const [loading, setLoading] = useState(false)
   const { isConnected } = useAccount()
-  const { writeContract } = useWriteContract()
+  const { createBetSlip, isPending } = useCreateBetSlip()
 
   const totalVolume = parseFloat(totalYesVolume) + parseFloat(totalNoVolume)
   const yesPercent = totalVolume > 0 ? (parseFloat(totalYesVolume) / totalVolume) * 100 : 50
@@ -56,27 +54,16 @@ export function PredictionCard({
       return
     }
 
-    setLoading(true)
     try {
-      const amountWei = parseEther(amount)
-
-      await writeContract({
-        address: predictionMarketAddress,
-        abi: predictionMarketABI,
-        functionName: predictionFns.placePrediction,
-        args: [
-          BigInt(marketId),
-          selectedOutcome === "yes",
-          amountWei,
-        ],
-        value: amountWei,
-      })
-      toast.success("Prediction placed! 🎉")
+      await createBetSlip(
+        [marketId],
+        [amount],
+        [selectedOutcome === "yes" ? 1 : 0]
+      )
+      toast.success("Bet placed! 🎉")
       setSelectedOutcome(null)
     } catch (error: any) {
-      toast.error(error.message || "Failed to place prediction")
-    } finally {
-      setLoading(false)
+      toast.error(error.message || "Failed to place bet")
     }
   }
 
@@ -185,11 +172,11 @@ export function PredictionCard({
 
             <Button
               onClick={handlePredict}
-              disabled={loading}
+              disabled={isPending}
               className="w-full h-14 md:h-16 text-lg md:text-xl font-black bg-[#a4ff31] hover:bg-[#b8ff52] text-black shadow-xl hover:shadow-2xl neon-glow transition-all duration-200"
             >
-              {loading ? (
-                "Placing Prediction..."
+              {isPending ? (
+                "Placing Bet..."
               ) : (
                 <>
                   <TrendingUp className="mr-2 h-5 w-5 md:h-6 md:w-6" />
