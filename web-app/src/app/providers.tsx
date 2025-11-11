@@ -10,24 +10,20 @@ import {
 import 'dotenv/config';
 
 import {
-    mainnet,
     sepolia,
     bsc,
     bscTestnet
 } from 'wagmi/chains';
-import { agentChain } from '@/lib/customChain';
 import { createConfig } from 'wagmi';
 import { http } from 'viem';
 
 // Configure wagmi client
 const config = createConfig({
-    chains: [mainnet, sepolia, bsc, bscTestnet, agentChain],
+    chains: [bscTestnet, sepolia, bsc],
     transports: {
-        [mainnet.id]: http(),
+        [bscTestnet.id]: http(),
         [sepolia.id]: http(),
         [bsc.id]: http(),
-        [bscTestnet.id]: http(),
-        [agentChain.id]: http(),
     },
 });
 
@@ -46,6 +42,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 <PrivyProvider
                     appId={PRIVY_APP_ID}
                     config={{
+                        defaultChain: bscTestnet,
+                        supportedChains: [bscTestnet, sepolia, bsc],
                         loginMethods: ['wallet', 'email', 'google'],
                         appearance: {
                             theme: 'light',
