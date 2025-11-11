@@ -7,13 +7,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "bun build:prisma && next build",
-    "build:prisma": "prisma generate --no-engine",
+    "build:prisma": "prisma generate --schema ../prisma/schema.prisma --no-engine",
     "start": "next start",
     "lint": "next lint",
     "format": "pnpm prettier ./src --write",
     "format:check": "pnpm prettier ./src --check"
   },
   "dependencies": {
+    "@prisma/client": "^6.4.1",
     "@prisma/extension-accelerate": "^1.2.2",
     "@privy-io/react-auth": "^2.24.0",
     "@privy-io/server-auth": "^1.32.2",
