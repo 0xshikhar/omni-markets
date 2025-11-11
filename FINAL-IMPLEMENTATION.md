@@ -69,10 +69,8 @@ DATABASE_URL=postgresql://user:password@host:5432/omnimarkets
 BSC_TESTNET_RPC_URL=https://data-seed-prebsc-1-s1.bnbchain.org:8545
 ORACLE_PRIVATE_KEY=0x...  # For AI oracle service
 
-# Will be populated after deployment
-NEXT_PUBLIC_MARKET_AGGREGATOR_ADDRESS=
-NEXT_PUBLIC_DISPUTE_ADDRESS=
-NEXT_PUBLIC_SUBJECTIVE_FACTORY_ADDRESS=
+# Contract addresses (auto-populated after deployment)
+contracts & abis are already added within web-app/src/contracts/index.ts
 
 # API keys
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...
@@ -119,15 +117,6 @@ npx prisma migrate dev --name init
 
 # Verify with Prisma Studio
 npx prisma studio
-```
-
-### Step 4: Update Environment Variables
-
-Copy contract addresses from deployment output to `web-app/.env.local`:
-```bash
-NEXT_PUBLIC_MARKET_AGGREGATOR_ADDRESS=0x...
-NEXT_PUBLIC_DISPUTE_ADDRESS=0x...
-NEXT_PUBLIC_SUBJECTIVE_FACTORY_ADDRESS=0x...
 ```
 
 ### Step 5: Start Services
