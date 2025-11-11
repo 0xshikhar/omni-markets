@@ -1,5 +1,5 @@
-import { nftABI } from "../../contract/abi/nftABI";
-import { tokenMintABI } from "../../contract/abi/tokenMintABI";
+import { nftABI } from "../contracts/abi/nftABI";
+import { tokenMintABI } from "../contracts/abi/tokenMintABI";
 
 // sepolia testnet
 export const contractAddresses = {
