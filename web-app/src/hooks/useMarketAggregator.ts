@@ -1,47 +1,6 @@
 import { useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
-
-const MARKET_AGGREGATOR_ADDRESS = process.env.NEXT_PUBLIC_MARKET_AGGREGATOR_ADDRESS as `0x${string}`;
-
-const MARKET_AGGREGATOR_ABI = [
-  {
-    "inputs": [
-      { "name": "question", "type": "string" },
-      { "name": "category", "type": "string" },
-      { "name": "marketType", "type": "uint8" },
-      { "name": "resolutionTime", "type": "uint256" }
-    ],
-    "name": "createMarket",
-    "outputs": [{ "name": "", "type": "uint256" }],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "name": "marketIds", "type": "uint256[]" },
-      { "name": "amounts", "type": "uint256[]" },
-      { "name": "outcomes", "type": "uint256[]" }
-    ],
-    "name": "createBetSlip",
-    "outputs": [{ "name": "", "type": "uint256" }],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "name": "betSlipId", "type": "uint256" }],
-    "name": "claimWinnings",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [{ "name": "user", "type": "address" }],
-    "name": "getUserBetSlips",
-    "outputs": [{ "name": "", "type": "uint256[]" }],
-    "stateMutability": "view",
-    "type": "function"
-  }
-] as const;
+import { ADDRESSES, MARKET_AGGREGATOR_ABI } from '@/contracts';
 
 export function useCreateMarket() {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
@@ -49,7 +8,7 @@ export function useCreateMarket() {
 
   const createMarket = async (question: string, category: string, resolutionTime: number) => {
     return writeContract({
-      address: MARKET_AGGREGATOR_ADDRESS,
+      address: ADDRESSES.MarketAggregator,
       abi: MARKET_AGGREGATOR_ABI,
       functionName: 'createMarket',
       args: [question, category, 0, BigInt(resolutionTime)]
@@ -67,7 +26,7 @@ export function useCreateBetSlip() {
     const totalAmount = amounts.reduce((sum, amt) => sum + parseEther(amt), 0n);
 
     return writeContract({
-      address: MARKET_AGGREGATOR_ADDRESS,
+      address: ADDRESSES.MarketAggregator,
       abi: MARKET_AGGREGATOR_ABI,
       functionName: 'createBetSlip',
       args: [
@@ -88,7 +47,7 @@ export function useClaimWinnings() {
 
   const claimWinnings = async (betSlipId: number) => {
     return writeContract({
-      address: MARKET_AGGREGATOR_ADDRESS,
+      address: ADDRESSES.MarketAggregator,
       abi: MARKET_AGGREGATOR_ABI,
       functionName: 'claimWinnings',
       args: [BigInt(betSlipId)]
@@ -100,7 +59,7 @@ export function useClaimWinnings() {
 
 export function useUserBetSlips(address?: `0x${string}`) {
   const { data, isLoading, error, refetch } = useReadContract({
-    address: MARKET_AGGREGATOR_ADDRESS,
+    address: ADDRESSES.MarketAggregator,
     abi: MARKET_AGGREGATOR_ABI,
     functionName: 'getUserBetSlips',
     args: address ? [address] : undefined,
