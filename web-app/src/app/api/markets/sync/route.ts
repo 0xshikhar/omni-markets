@@ -1,34 +1,35 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { fetchPolymarketMarkets } from '@/lib/polymarket';
+import { ADDRESSES, CHAIN_ID } from '@/contracts';
 
 const prisma = new PrismaClient();
 
 export async function POST() {
   try {
     const markets = await fetchPolymarketMarkets(100);
-    const contractAddress = process.env.NEXT_PUBLIC_MARKET_AGGREGATOR_ADDRESS || '0x0000000000000000000000000000000000000000';
+    const contractAddress = ADDRESSES.MarketAggregator;
 
     let synced = 0;
     for (const market of markets) {
       const parentMarket = await prisma.market.upsert({
         where: {
           chainId_contractAddress_marketId: {
-            chainId: 97,
+            chainId: CHAIN_ID,
             contractAddress,
             marketId: 0
           }
         },
         update: {},
         create: {
-          chainId: 97,
+          chainId: CHAIN_ID,
           contractAddress,
           marketId: 0,
-          question: market.question,
-          category: market.category,
+          question: String(market.question || ''),
+          category: String(market.category || 'General'),
           marketType: 'public',
           status: 'active',
-          resolutionTime: market.resolutionTime,
+          resolutionTime: new Date((Number(market.resolutionTime || 0)) * 1000),
           totalVolume: 0,
           creator: '0x0000000000000000000000000000000000000000'
         }
