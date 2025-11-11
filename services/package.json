@@ -1,17 +1,31 @@
 {
-  "name": "@omni-markets/ai-oracle",
+  "name": "@omni-markets/services",
   "version": "1.0.0",
-  "description": "AI-powered oracle for market resolution monitoring",
-  "main": "src/index.js",
+  "description": "OmniMarkets backend services: market-syncer REST API, AI oracle, adapters",
+  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "node --watch src/index.js",
-    "start": "node src/index.js"
+    "dev": "tsx watch src/index.ts",
+    "dev:syncer": "tsx watch src/index.ts",
+    "dev:ai": "tsx watch src/ai-oracle/index.ts",
+    "dev:dispute": "tsx watch src/dispute-bot/index.ts",
+    "dev:subjective": "tsx watch src/subjective-oracle/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate --schema ../prisma/schema.prisma"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.0",
+    "@prisma/client": "^6.4.1",
+    "dotenv": "^16.3.1",
     "ethers": "^6.9.0",
+    "express": "^4.19.2",
     "node-fetch": "^3.3.2",
-    "dotenv": "^16.3.1"
+    "polymarket-data": "^0.0.1"
   },
-  "type": "module"
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "prisma": "^6.4.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.4.5"
+  }
 }
