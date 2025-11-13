@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { fetchPolymarketMarkets } from '@/lib/polymarket';
 import { ADDRESSES, CHAIN_ID } from '@/contracts';
-
-const prisma = new PrismaClient();
 
 export async function POST() {
   try {

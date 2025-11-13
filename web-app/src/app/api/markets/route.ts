@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { publicClient } from '@/lib/onchain';
 import { ADDRESSES, MARKET_AGGREGATOR_ABI } from '@/contracts';
-
-const prisma = new PrismaClient();
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
