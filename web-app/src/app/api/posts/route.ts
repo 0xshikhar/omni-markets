@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { ADDRESSES, CHAIN_ID } from "@/contracts"
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,52 +11,37 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "50")
 
     const where: any = {}
-    
+
     if (resolved !== null) {
-      where.isResolved = resolved === "true"
-    }
-    
-    if (userId) {
-      where.userId = userId
+      where.status = resolved === "true" ? "resolved" : { not: "resolved" }
     }
 
     if (status) {
       where.status = status
     }
 
-    const posts = await prisma.post.findMany({
+    if (userId) {
+      const user = await prisma.user.findUnique({ where: { id: userId } })
+      if (user) where.creator = user.walletAddress
+    }
+
+    const markets = await prisma.market.findMany({
       where,
       include: {
-        user: {
-          select: {
-            id: true,
-            walletAddress: true,
-            username: true,
-            avatar: true,
-          },
+        creatorUser: {
+          select: { id: true, walletAddress: true, username: true, avatar: true },
         },
-        predictions: {
-          select: {
-            id: true,
-            outcome: true,
-            amount: true,
-            userId: true,
-          },
+        externalMarkets: {
+          select: { marketplace: true, price: true, liquidity: true, lastUpdate: true },
         },
-        _count: {
-          select: {
-            predictions: true,
-            postComments: true,
-          },
-        },
+        _count: { select: { betSlipMarkets: true } },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: { createdAt: "desc" },
       take: limit,
     })
 
-    return NextResponse.json({ posts })
+    // Keep response key compatible
+    return NextResponse.json({ posts: markets })
   } catch (error) {
     console.error("Error fetching posts:", error)
     return NextResponse.json(
@@ -70,57 +56,41 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       userId,
-      mediaUrl,
-      mediaType,
-      thumbnailUrl,
-      caption,
       question,
       marketType,
       closeTime,
-      minStake,
-      maxStake,
-      creatorFeePercent,
-      nftContractAddr,
-      nftTokenId,
-      nftImageUrl,
-      nftName,
+      category,
       marketId,
       contractAddress,
     } = body
 
-    const post = await prisma.post.create({
+    // Map userId -> wallet address for Market.creator
+    let creator = "0x0000000000000000000000000000000000000000"
+    if (userId) {
+      const user = await prisma.user.findUnique({ where: { id: userId } })
+      if (user) creator = user.walletAddress
+    }
+
+    const created = await prisma.market.create({
       data: {
-        userId,
-        mediaUrl,
-        mediaType,
-        thumbnailUrl,
-        caption,
-        question,
-        marketType: marketType || "binary",
-        closeTime: new Date(closeTime),
-        minStake,
-        maxStake: maxStake || minStake,
-        creatorFeePercent: creatorFeePercent || 5,
-        nftContractAddr,
-        nftTokenId,
-        nftImageUrl,
-        nftName,
-        marketId,
-        contractAddress,
+        chainId: CHAIN_ID,
+        contractAddress: contractAddress || ADDRESSES.MarketAggregator,
+        marketId: marketId || 0,
+        question: String(question || ""),
+        category: String(category || "General"),
+        marketType: String(marketType || "public"),
+        status: "active",
+        resolutionTime: new Date(closeTime || Date.now() + 24 * 60 * 60 * 1000),
+        totalVolume: 0,
+        creator,
       },
       include: {
-        user: {
-          select: {
-            id: true,
-            walletAddress: true,
-            username: true,
-            avatar: true,
-          },
-        },
+        creatorUser: { select: { id: true, walletAddress: true, username: true, avatar: true } },
+        _count: { select: { betSlipMarkets: true } },
       },
     })
 
-    return NextResponse.json({ post }, { status: 201 })
+    return NextResponse.json({ post: created }, { status: 201 })
   } catch (error) {
     console.error("Error creating post:", error)
     return NextResponse.json(
