@@ -10,142 +10,94 @@ export async function GET(request: NextRequest) {
     let leaderboard: any[] = []
 
     if (type === "earnings") {
-      // Top earners based on claimed payouts
-      const topEarners = await prisma.prediction.groupBy({
-        by: ["userId"],
+      // Top earners based on settled bet slip actual payouts
+      const topEarners = await prisma.betSlip.groupBy({
+        by: ["user"],
         where: {
-          claimed: true,
-          claimedAmount: {
-            not: null,
-          },
+          status: "settled",
+          actualPayout: { not: null },
         },
-        _sum: {
-          claimedAmount: true,
-        },
-        orderBy: {
-          _sum: {
-            claimedAmount: "desc",
-          },
-        },
+        _sum: { actualPayout: true },
+        orderBy: { _sum: { actualPayout: "desc" } },
         take: limit,
       })
 
-      const userIds = topEarners.map((e) => e.userId)
+      const walletAddresses = topEarners.map((e) => e.user)
       const users = await prisma.user.findMany({
-        where: {
-          id: {
-            in: userIds,
-          },
-        },
-        select: {
-          id: true,
-          walletAddress: true,
-          username: true,
-          avatar: true,
-        },
+        where: { walletAddress: { in: walletAddresses } },
+        select: { id: true, walletAddress: true, username: true, avatar: true },
       })
 
       leaderboard = topEarners.map((earner) => {
-        const user = users.find((u) => u.id === earner.userId)
+        const user = users.find((u) => u.walletAddress === earner.user)
         return {
           user,
-          totalEarnings: earner._sum.claimedAmount?.toString() || "0.0",
+          totalEarnings: earner._sum.actualPayout?.toString() || "0.0",
         }
       })
     } else if (type === "accuracy") {
-      // Most accurate predictions
-      const predictions = await prisma.prediction.findMany({
-        where: {
-          post: {
-            isResolved: true,
-          },
-        },
+      // Accuracy based on BetSlipMarket outcomes vs resolved Market outcomes
+      const entries = await prisma.betSlipMarket.findMany({
+        where: { market: { status: "resolved" } },
         include: {
-          post: {
-            select: {
-              winningOutcome: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              walletAddress: true,
-              username: true,
-              avatar: true,
-            },
-          },
+          market: { select: { outcome: true } },
+          betSlip: { select: { user: true } },
         },
       })
 
-      const userStats: Record<
-        string,
-        { user: any; correct: number; total: number }
-      > = {}
+      const stats: Record<string, { wallet: string; correct: number; total: number }> = {}
 
-      predictions.forEach((pred) => {
-        const userId = pred.userId
-        if (!userStats[userId]) {
-          userStats[userId] = {
-            user: pred.user,
-            correct: 0,
-            total: 0,
-          }
+      for (const e of entries) {
+        const wallet = e.betSlip.user
+        if (!stats[wallet]) stats[wallet] = { wallet, correct: 0, total: 0 }
+        stats[wallet].total++
+        if (e.market.outcome !== null && e.outcome === e.market.outcome) {
+          stats[wallet].correct++
         }
-        userStats[userId].total++
-        if (pred.outcome === pred.post.winningOutcome) {
-          userStats[userId].correct++
-        }
-      })
+      }
 
-      leaderboard = Object.values(userStats)
-        .filter((stat) => stat.total >= 3) // Minimum 3 predictions
-        .map((stat) => ({
-          user: stat.user,
-          accuracy: ((stat.correct / stat.total) * 100).toFixed(1),
-          totalPredictions: stat.total,
-          correctPredictions: stat.correct,
-        }))
-        .sort((a, b) => parseFloat(b.accuracy) - parseFloat(a.accuracy))
+      const wallets = Object.values(stats)
+        .filter((s) => s.total >= 3)
+        .sort((a, b) => (b.correct / b.total) - (a.correct / a.total))
         .slice(0, limit)
+
+      const users = await prisma.user.findMany({
+        where: { walletAddress: { in: wallets.map((w) => w.wallet) } },
+        select: { id: true, walletAddress: true, username: true, avatar: true },
+      })
+
+      leaderboard = wallets.map((s) => {
+        const user = users.find((u) => u.walletAddress === s.wallet)
+        const accuracy = ((s.correct / s.total) * 100).toFixed(1)
+        return {
+          user,
+          accuracy,
+          totalPredictions: s.total,
+          correctPredictions: s.correct,
+        }
+      })
     } else if (type === "volume") {
-      // Highest prediction volume
-      const topVolume = await prisma.prediction.groupBy({
-        by: ["userId"],
-        _sum: {
-          amount: true,
-        },
-        _count: {
-          id: true,
-        },
-        orderBy: {
-          _sum: {
-            amount: "desc",
-          },
-        },
+      // Highest volume by total bet amount and count of bet slips
+      const topVolume = await prisma.betSlip.groupBy({
+        by: ["user"],
+        _sum: { totalAmount: true },
+        _count: { id: true },
+        orderBy: { _sum: { totalAmount: "desc" } },
         take: limit,
       })
 
-      const userIds = topVolume.map((v) => v.userId)
+      const walletAddresses = topVolume.map((v) => v.user)
       const users = await prisma.user.findMany({
-        where: {
-          id: {
-            in: userIds,
-          },
-        },
-        select: {
-          id: true,
-          walletAddress: true,
-          username: true,
-          avatar: true,
-        },
+        where: { walletAddress: { in: walletAddresses } },
+        select: { id: true, walletAddress: true, username: true, avatar: true },
       })
 
       leaderboard = topVolume.map((vol) => {
-        const user = users.find((u) => u.id === vol.userId)
+        const user = users.find((u) => u.walletAddress === vol.user)
         return {
           user,
-          totalVolume: vol._sum.amount?.toString() || "0.0",
-          predictionCount: vol._count.id || 0,
+          totalVolume: vol._sum.totalAmount?.toString() || "0.0",
+          betSlipCount: vol._count.id || 0,
         }
       })
     }
