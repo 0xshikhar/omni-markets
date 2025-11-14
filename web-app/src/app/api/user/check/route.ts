@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Address is required' }, { status: 400 });
     }
 
-    const normalizedAddress = address;
+    const normalizedAddress = address.toLowerCase();
 
     // Check if we've recently processed this address
     const lastChecked = recentChecks[normalizedAddress];
