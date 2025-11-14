@@ -3,6 +3,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client';
 import { ethers } from 'ethers';
+import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { google } from '@ai-sdk/google';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
