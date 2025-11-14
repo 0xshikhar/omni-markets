@@ -23,9 +23,9 @@ export async function fetchPolymarketMarkets(limit = 100) {
       question: market.question,
       category: market.category || 'general',
       // Convert price to basis points (0-10000)
-      price: Math.round((market.outcomePrices?.[0] || 0.5) * 10000),
+      price: Math.round(((market.outcomePrices as number[] | undefined)?.[0] || 0.5 ) * 10000),
       liquidity: parseFloat(market.liquidity || '0'),
-      resolutionTime: new Date(market.endDate),
+      resolutionTime: new Date(market.endDate || Date.now() + 24 * 60 * 60 * 1000),
       lastUpdate: new Date(),
     }));
   } catch (error) {
@@ -53,9 +53,9 @@ export async function fetchPolymarketMarket(marketId: string) {
       externalId: market.id,
       question: market.question,
       category: market.category || 'general',
-      price: Math.round((market.outcomePrices?.[0] || 0.5) * 10000),
+      price: Math.round(((market.outcomePrices as number[] | undefined)?.[0] || 0.5) * 10000),
       liquidity: parseFloat(market.liquidity || '0'),
-      resolutionTime: new Date(market.endDate),
+      resolutionTime: new Date(market.endDate || Date.now() + 24 * 60 * 60 * 1000),
       lastUpdate: new Date(),
     };
   } catch (error) {

@@ -56,7 +56,7 @@ export class PolymarketAdapter {
         category: String(m.category ?? 'general'),
         price: Math.round(((m.outcomePrices?.[0] ?? 0.5) as number) * 10000),
         liquidity: parseFloat(String(m.liquidity ?? '0')),
-        resolutionTime: new Date(m.endDate),
+        resolutionTime: new Date(m.endDate ?? 0),
         lastUpdate: new Date(),
       };
     } catch (err) {
