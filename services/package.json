@@ -15,7 +15,10 @@
     "prisma:generate": "prisma generate --schema ../prisma/schema.prisma"
   },
   "dependencies": {
+    "@ai-sdk/google": "^2.0.34",
+    "@ai-sdk/openai": "^2.0.68",
     "@prisma/client": "^6.4.1",
+    "ai": "^5.0.93",
     "dotenv": "^16.3.1",
     "ethers": "^6.9.0",
     "express": "^4.19.2",
