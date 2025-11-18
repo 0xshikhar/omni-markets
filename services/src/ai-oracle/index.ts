@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client';
 import { ethers } from 'ethers';
 import { generateText } from 'ai';
-import { anthropic } from '@ai-sdk/anthropic';
+import { openai } from '@ai-sdk/openai';
 import { google } from '@ai-sdk/google';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +13,7 @@ const __dirname = path.dirname(__filename);
 // Env: prefer monorepo root, fallback to web-app
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 dotenv.config({ path: path.resolve(__dirname, '../../../web-app/.env.local') });
+dotenv.config({ path: path.resolve(__dirname, '../../../web-app/.env') });
 
 const prisma = new PrismaClient();
 
@@ -28,7 +29,7 @@ const wallet = privateKey ? new ethers.Wallet(privateKey, provider) : null;
 const CHECK_INTERVAL_MS = parseInt(process.env.AI_CHECK_INTERVAL_MS || String(60_000), 10);
 
 // AI Provider selection
-const AI_PROVIDER = process.env.AI_PROVIDER || 'anthropic'; // 'anthropic' or 'google'
+const AI_PROVIDER = process.env.AI_PROVIDER || 'google'; // 'openai' or 'google'
 
 // Fetch evidence from NewsAPI
 async function fetchNewsEvidence(question: string) {
@@ -109,7 +110,7 @@ type MinimalMarket = {
 
 // Analyze evidence with AI
 async function analyzeWithAI(question: string, outcome: number, evidence: any[]) {
-  if (!process.env.ANTHROPIC_API_KEY && !process.env.GOOGLE_API_KEY) {
+  if (!process.env.OPENAI_API_KEY && !process.env.GOOGLE_API_KEY) {
     console.warn('[ai-oracle] No AI API keys configured, using heuristics');
     return { confidence: 50, reasoning: 'AI not configured', verdict: 'UNCLEAR' };
   }
@@ -145,7 +146,7 @@ Confidence scale:
   try {
     const model = AI_PROVIDER === 'google' 
       ? google('gemini-1.5-flash')
-      : anthropic('claude-3-5-sonnet-20241022');
+      : openai('gpt-4o-mini');
 
     const { text } = await generateText({
       model,
