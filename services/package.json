@@ -12,7 +12,7 @@
     "dev:subjective": "tsx watch src/subjective-oracle/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
-    "prisma:generate": "prisma generate --schema ../prisma/schema.prisma"
+    "prisma:generate": "prisma generate --schema ./prisma/schema.prisma"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.34",
