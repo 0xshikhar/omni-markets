@@ -1,0 +1,153 @@
+// Prisma schema for services package (copied from root)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  walletAddress String    @unique
+  createdAt     DateTime  @default(now())
+  lastLoginAt   DateTime? @updatedAt
+
+  // User profile information
+  username     String?   @unique
+  avatar       String?   // IPFS hash or URL
+  bio          String?
+  NFTid        String?
+  aaWallet     String?   // ERC-4337 smart account address
+  nonce        Int       @default(0)
+
+  // Relations
+  betSlips     BetSlip[]
+  disputes     Dispute[]
+  votes        Vote[]
+  createdMarkets Market[] @relation("MarketCreator")
+
+  @@index([walletAddress])
+}
+
+model Market {
+  id              String   @id @default(cuid())
+  chainId         Int
+  contractAddress String
+  marketId        Int
+  question        String
+  category        String
+  marketType      String   // 'public' | 'subjective'
+  status          String   // 'active' | 'resolved' | 'disputed' | 'cancelled'
+  resolutionTime  DateTime
+  totalVolume     Decimal  @default(0) @db.Decimal(20, 8)
+  creator         String
+  outcome         Int?     // 0=NO, 1=YES, 2=INVALID
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  creatorUser     User?    @relation("MarketCreator", fields: [creator], references: [walletAddress])
+  externalMarkets ExternalMarket[]
+  betSlipMarkets  BetSlipMarket[]
+  disputes        Dispute[]
+  
+  @@unique([chainId, contractAddress, marketId])
+  @@index([status, category])
+  @@index([creator])
+}
+
+model ExternalMarket {
+  id          String   @id @default(cuid())
+  marketId    String
+  marketplace String   // 'polymarket' | 'bnb-amm' | 'azuro'
+  externalId  String
+  price       Int      // basis points (0-10000)
+  liquidity   Decimal  @db.Decimal(20, 8)
+  lastUpdate  DateTime @default(now())
+  
+  market      Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  
+  @@unique([marketplace, externalId])
+  @@index([marketId])
+}
+
+model BetSlip {
+  id             String   @id @default(cuid())
+  chainId        Int
+  betSlipId      Int
+  user           String
+  totalAmount    Decimal  @db.Decimal(20, 8)
+  expectedPayout Decimal? @db.Decimal(20, 8)
+  actualPayout   Decimal? @db.Decimal(20, 8)
+  status         String   // 'pending' | 'placed' | 'settled' | 'cancelled'
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relations
+  userAccount    User     @relation(fields: [user], references: [walletAddress])
+  markets        BetSlipMarket[]
+  
+  @@unique([chainId, betSlipId])
+  @@index([user, status])
+}
+
+model BetSlipMarket {
+  id         String  @id @default(cuid())
+  betSlipId  String
+  marketId   String
+  amount     Decimal @db.Decimal(20, 8)
+  outcome    Int     // 0=NO, 1=YES
+  
+  betSlip    BetSlip @relation(fields: [betSlipId], references: [id], onDelete: Cascade)
+  market     Market  @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  
+  @@unique([betSlipId, marketId])
+  @@index([betSlipId])
+  @@index([marketId])
+}
+
+model Dispute {
+  id              String   @id @default(cuid())
+  chainId         Int
+  disputeId       Int
+  marketId        String
+  submitter       String
+  evidenceHash    String   // IPFS hash
+  stake           Decimal  @db.Decimal(20, 8)
+  status          String   // 'active' | 'resolved' | 'rejected' | 'expired'
+  votesFor        Decimal  @default(0) @db.Decimal(20, 8)
+  votesAgainst    Decimal  @default(0) @db.Decimal(20, 8)
+  proposedOutcome Int
+  aiConfidence    Int?     // 0-100
+  submittedAt     DateTime @default(now())
+  resolvedAt      DateTime?
+  
+  // Relations
+  market          Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  submitterUser   User     @relation(fields: [submitter], references: [walletAddress])
+  votes           Vote[]
+  
+  @@unique([chainId, disputeId])
+  @@index([status, marketId])
+  @@index([submitter])
+}
+
+model Vote {
+  id         String   @id @default(cuid())
+  disputeId  String
+  voter      String
+  support    Boolean
+  weight     Decimal  @db.Decimal(20, 8)
+  timestamp  DateTime @default(now())
+  
+  // Relations
+  dispute    Dispute  @relation(fields: [disputeId], references: [id], onDelete: Cascade)
+  voterUser  User     @relation(fields: [voter], references: [walletAddress])
+  
+  @@unique([disputeId, voter])
+  @@index([disputeId])
+  @@index([voter])
+}
